@@ -1,0 +1,616 @@
+1 
+ PART I  
+STATICALLY DETERMINATE STRUCTURES  
+CHAPTER 1  
+OVERVIEW OF STRUCTURAL MECHANICS  AND GEOMETRIC AL 
+ANALYSES  OF PLANAR STRUCTURES  
+UNIT 1  
+OVERVIEW OF STRUCTURAL MECHANICS  
+I. Objects and study tasks  
+1. Objects  
+For civil engineering, some structures such as  buildings, bridges, dams, marine and 
+mines structures, are the objects that need to be studied.  In fact, c onstruction 
+materials include stone, wood, steel, reinforced concrete  (RC) , fiber reinforced 
+polymer  (FRP) , etc. These materials have different mecha nical properties, however, 
+in structural analysis, the research objects are commonly considered as elastic 
+deformed solid  (Fig. 1.1) . 
+  
+(a) The office building  (b) The highway bridge  
+Fig. 1.1  
+2 
+ Structural analysis is performed to make sure that the struc ture satisfies three 
+requirements related to strength, deformation and stability in service.  
+Strength requirement:  The structures have capacity for working in the condition of 
+non-damaged failure under the loading or other outside impacts.  
+Deformation requ irement:  The structures have capacity for working with the 
+maximum deformation or displacement that does not exceed the allow limitation.  
+Stability requirement:   The structures have capacity to work in normal condition s, 
+to maintain its position or state i n its original deformation, without slipping, 
+overturning, settling or deviating from its original position.  
+2. Study tasks  
+The main tasks of structural analysis are to determine internal force  components 
+including bending moment, shear force and axial for ce (M, Q, N ) and displacement 
+at all sections in the structure  for all common structures subjected to loads or some 
+other external causes.  
+3. Two kinds of structural problem s  
+a. Examining  structural problems  
+In the kind of exami ning problems, there is a real structure constructed (building or 
+bridge) with  the determined materials, dimensions and loading , we conduct the 
+determination of internal force and deformation in the structure . Based on that, we 
+can examine strength, deformation and stability require ments.  
+b. Designing structural problems  
+Based on the design tasks, we need to choose appropriate materials and dimensions, 
+then determine loading applied to the structure.  Next, the examining process would 
+be performed to check the strength, deformation an d stability requirements.  The 
+calculation can result in one of three cases below.  
+- Case 1: The structure satisfied with the technical and economic requirements. 
+It is ok ; so we can change to the next step, detailed designing.  3 
+ - Case 2: The structure did not s atisfy the technical requirements (strength, 
+deformation and stability). It is not  ok; we need to redesign by reducing 
+loading or increasing the  structural components’ dimensions or  strength  of the 
+chosen materials.  
+- Case 3: The structure satisfied the tech nical requirement but did not with 
+economic requirement.  It is not ok; we need to redesign by increasing loading 
+or reducing the structural components’ dimensions or strength  of the chosen 
+materials.  
+ 
+II. Idealized structure (analytical model)  
+An exact ana lysis of a structure can never be carried out, since estimates always have 
+to be made of the loadings and the strength of the materials composing the structure. 
+Furthermore, points of application for the loadings must also be estimated. It is 
+important, th erefore, that the structural engineer develop s the ability to model or 
+idealize a structure so that he or she can perform a practical force analysis of the 
+members. In this section we will develop  the basic techniques necessary to do this.  
+1. Concept  
+Idealized structure or analytical model is the simplified model of a real structure that 
+satisfies two requirements including both the appropriate working reflection  of the 
+real structure and the simplification  in structural analysis.  
+2. Choosing the idealized  structure  
+To choose the idealized structure, we can follow the two main steps, (a) changing 
+from the real structure to the partially idealized structure, and then (b) changing from 
+the partially idealized structure to the idealized structure.  
+(a) Changing from the real structure to the partially idealized structure  
+Conduct as follows:  4 
+ - Replace the columns and beams by their axial lines  and replace the slabs by 
+their middle surfaces.  
+- Replace the factors related to the materials and member section properties by 
+the elastic modulus ( E), area of cross -section ( A), cross -section moment of 
+inertia ( I), etc.  
+- Replace the support devices  by idealized support connections such as the pin 
+connection, the roller support, and the fixed joint  depending on the intent of 
+the designer . 
+- Transfer the actual loadings acting on the building’s outside surfaces into the 
+loading plane.  
+(b) Changing from the partially idealized structure to the idealized structure  
+When necessary, we can eliminate some none important things  (idealizati on) to 
+obtain the idealized structure  (analytical model)  that is simple for the structural 
+analysis process.  
+3. Example  
+Please choose the analytical model for the reinforced concrete ( RC) truss of the 
+building ’s roof as given in Fig. 1.2a . 
+ 
+(a) The  roof structure  
+2P
+2P
+1P2P
+1P
+E, FA B
+lDàn BTCTC?tT?m l?p
+Xà g?
+A Ba
+Reinforced concrete tru ss Column  
+L: Truss span  Roof cladding  
+Purlin  5 
+  
+(b) The partially analytical model  
+ 
+(c) The analytical model  
+Fig. 1.2  
+Another example of choosing the idealized structure for a simple steel frame as can 
+be seen in Fig. 1.3.  
+  
+(a) Actual structure  (b) Idealized structure  
+Fig. 1.3  
+2P
+2P
+1P2P
+1P
+E, FA B
+lDàn BTCTC?tT?m l?p
+Xà g?
+A Ba
+
+2P
+2P
+P2P
+P
+E, F
+lA Bb
+L 
+L 6 
+ The ability to reduce an actual structure to an idealized form, as shown by these 
+examples, can only be gained by experience.  In engineering practice, if it becomes 
+doubtful as to how to model a structure or transfer the loads to the members, it i s 
+best to consider several idealized structures and loadings and then design the actual 
+structure so that it can resist the loadings in all the idealized models.  
+ 
+III. Structural classifications  
+There are two ways for classifying structures including class ifications according to 
+analytical model and method of analysis.  
+1. Classification based on the analytical model  
+By this way, the structures are divided into two main kinds : planar and space 
+structures.  
+1.1. Planar structures  
+Planar structur e is a structur e that its composed members lie in a plane  and it is 
+subjected to a force system that lies in the same  plane. There  are s everal  types of 
+planar structures such as beams, frames, trusses, arcs, and complex /combined  
+structures.  Some examples of these structu res are given as below  (Figs. 1.4 – 1.8). 
+ Beams  
+ 
+Fig. 1.4  
+ Frames  
+  
+Fig. 1.5  
+a) b) c)
+7 
+  Trusses  
+  
+Fig. 1.6  
+ 
+ Arches 
+  
+Fig. 1.7  
+ Complex /combined  structures  
+  
+Fig. 1.8  
+ 
+1.2. Space structures  
+Space  structures are composed of members that lie in the three -dime nsional space  
+and the external loadings acting on structures also lie in that space .  
+Space structure is a structure that its composed members lie in a three -dimensional 
+space and it is subjected to a force system that lies in the same space. There  are 
+several types of space  structures such as intersection  beams, space frames, space 
+trusses, and space arches/shells . Some examples of these structures are given as 
+below  (Fig. 1.9) . 
+b)
+8 
+   
+(a) Intersection beams  (b) Space frame  
+  
+(c) Space truss  (d) Space sh ell 
+Fig. 1.9  
+2. Classification based on the method of analysis  
+a. According to static point of view  
+There are two types including statically determinate structures and statically 
+indeterminate structures.  
+ Statically determinate structures:  The equilibrium  equations provide both the 
+necessary and sufficient conditions for equilibrium. When all the forces in a 
+structure  can be determined strictly from these equations, the structure is 
+referred  to as statically determinate . 
+ Statically indeterminate structures : The equilibrium equations provide both 
+the necessary and sufficient conditions for equilibrium. Structures having 
+more unknown forces than available equilibrium equations are called 
+statically indeterminate . 
+b. According to kinematic  point of view  
+9 
+ There are two types including kinem atically determinate structures and 
+kinematically  indeterminate structures.  
+ Kinematically determinate structures:  It is a structure when subjected to the 
+compulsive displacement of a node leading a deflection shape that we can 
+determine all displacement components of remain ing nodes by only using the 
+kinematic conditions.  
+ Kinematically indeterminate structures: It is a structure when subjected to the 
+compulsive displacement of a node leading a deflection shape that we can not 
+determine all displacement components of remain ing nodes by using just the 
+kinematic conditions.  
+ 
+IV. External causes  leading to internal loadings/forces and 
+deflections/ displacements  
+The external loads, temperature, settlement and fabrication errors  of struc tural 
+members are causes creating the internal forces and displacements at any point or 
+whole structure.  
+1. External loadings  
+The external loadings acting on a structure will create internal forces and 
+displacements  for both s tatically determinate structur es and s tatically indeterminate 
+structures . The loading classification is shown as below:  
+a. According to acting  time 
+There are two types including long -term loading (dead loading) and short -term 
+loading (live loading) . 
+b. According to acting location 
+There are two types including non -moving loading and mov ing loading.  
+c. According to acting approach  
+There are two types including static loading and dynamic loading.  10 
+ d. According to acting form  
+There are three types including concentrated loading, distributed  loading and 
+bending moment loading.  
+2. Environmental temperature  
+The temperature fluctuations will create displacements in statically determinate 
+structures and both internal forces and displacements in  statically indeterminate 
+structures . 
+3. Settlement a nd fabrication errors of structural members  
+As the same as environmental temperature, t he support settlement and fabrication 
+errors of structural members will create displacements in statically determinate 
+structures and both internal forces and displaceme nts in  statically indeterminate 
+structures . 
+ 
+V. Idealized assumptions and principle of superposition  
+1. Idealized assumptions  
+Two requirements must be imposed for the principle of superposition to apply:   
+a. The material must behave in a linear -elastic man ner, so that Hooke’s law is valid, 
+and therefore the load will be proportional to displacement  (Fig. 1.10a) . 
+b. The geometry of the structure must not undergo significant change when the loads 
+are applied, i.e., small displacement theory applies  (Fig. 1.10 b). Large displacements 
+will significantly change the position and orientation of the loads. An example would 
+be a cantilevered thin rod subjected to a force at its end.  11 
+   
+(a) Linear -elastic material  (b) Small displacement theory  
+Fig. 1.10  
+2. Princip le of superposition  
+The principle of superposition forms the basis for much of the theory of structural 
+analysis. It may be stated as follows: The total displacement or  internal loadings 
+(stress) at a point in a structure subjected to several  external load ings can be 
+determined by adding together the displacements  or internal loadings (stress) 
+caused by each of the external loads acting  separately . For this statement to be valid 
+it is necessary that a linear  relationship exist among the loads, stresses, and  
+displacements.  
+O 
+ 0 0 12 
+  
+Fig. 1.11  
+ 
+Based on the principle of superposition, we have: V A = V A1   V A2; V B = V B1   V B2; 
+and ΔC = ΔC1   ΔC2, as can be seen in Fig. 1.11.   
+ 
+UNIT 2  
+GEOMETRIC AL ANALYSES  OF PLANAR STRUCTURES   
+I. Concepts  
+In general, then, a structure w ill be geometrically unstable  - that is, it will move 
+slightly or collapse  - if there are fewer reactive forces than equations of equilibrium; 
+or if there are enough reactions, instability will occur if the lines of action of the 
+reactive forces intersect at a common point or are parallel to one another . If the 
+structure consists of several members or  components, local instability of one or 
+VA
+VA1P1
+VA2AP2
+BB AA BP1 P2
+VB
+VB1
+VB2C
+C
+C
+C1
+C
+C 2  13 
+ several of these members can  generally be determined by inspection . If the members 
+form a collapsible  mechanism, the s tructure will be unstable.  
+1. Geometrically stable structure s 
+Geometrically stable structure  is a structure that can keep its geometrical shape when 
+subject to an external loading if structural members were considered as absolutely 
+rigid bodies. The struct ure shown as in Fig. 1.12 is a typical example of 
+geometrically stable structure s. 
+ 
+Fig. 1.12  
+2. Geometrically unstable structures  
+Geometrically unstable structure  is a structure that can not keep its geometrical shape 
+when subject to an external loading although  structural members were considered as 
+absolutely rigid bodies. The structure shown as in Fig. 1.1 3 is a typical example of 
+geometrically unstable structure s. 
+ 
+Fig. 1.13  
+3. Geometrically semi -unstable structures  
+Geometrically (transient -) semi-unstable structure is a structure that will change its 
+geometrical shape in very small amount when subject to an external loading although 
+ 
+ 14 
+ structural members were considered as absolutely rigid bodies. The structure shown 
+as in Fig. 1.14 is a typical example o f geometrically (transient -) semi-unstable 
+structures . 
+ 
+Fig. 1.14  
+4. Rigid body and degree s of freedom  
+a. Rigid body  (structural member)  
+Any geometrically stable structure is considered as a rigid body. Symbol and 
+examples of the rigid body can be seen i n Fig. 1.1 5. 
+   
+(a) Rigid body’s 
+symbol  (b) Rigid body in static 
+determinacy  (c) Rigid body in static 
+indeterminacy  
+Fig. 1.15  
+b. Degree s of freedom  
+When a structure is loaded, specified points on it, called nodes, will undergo 
+unknown displacements. T hese displacements are referred to as the degrees of 
+freedom for the structure . The number of these  unknowns is referred to as the degree 
+in which the structure is kinematically indeterminate . In three dimensions, each node 
+on a frame or beam can have at most three linear displacements and three rotational 
+displacements; and in two dimensions, each node can have at most two linear 
+displacements and one rotational displacement.  
+15 
+ Therefore, in two dimensions, a rigid body or a cross section on a frame or beam has 
+at most three degrees of freedom including two linear displacements and one 
+rotational displacement  (Fig. 1.16a) . Meanwhile, for a truss when there is only axial 
+force component in all truss members, the node’s degrees of freedom include  two 
+linear dis placements only  (Fig. 1.16b) . 
+  
+(a) Rigid body’s degree of freedom  (b) Node’s degree of freedom  
+Fig. 1.16  
+ 
+II. Connection types  
+As known, the connections are used to connect structural members together or 
+between the structural members and the supporti ng devices or foundation’s ground.  
+In general, there are two main connection types including simple connections and 
+complex connections. In which, a simple connection is used to connect two structural 
+members or rigid bodies together , and a complex connect ion is used to connect three 
+or more than three  rigid bodies together.  
+1. Simple connections  
+Structural members are joined together in various ways depending on the intent of 
+the designer.  The three types of joints most often specified are the pin connecti on, 
+the roller support, and the fixed joint. A pin -connected joint and a roller support 
+allow some freedom for slight rotation, whereas a fixed joint allows no relative 
+rotation between the connected members and is consequently more expensive to 
+yo
+Oy
+MC
+(xo,yo,)
+xo x
+O xy
+M
+(xo,yo)
+xoyo16 
+ fabricate.  Some typically supported connections with metal or concrete material are 
+shown in Figs. 1.17 and 1.18, respectively.  
+  
+(a) Typical pin -supported connection 
+(metal)  (b) Typical fixed -supported connection 
+(metal)  
+Fig. 1.17  
+  
+(a) Typical roller -suppo rted connection 
+(concrete)  (b) Typical fixed -supported connection 
+(concrete)  
+Fig. 1.18  
+Therefore, simple connections are divided in to three types  including type 1 (roller 
+connection), type 2 (pin connection) and type 3 (fixed connection). It  depend s the 
+degrees  of freedom  that each connection  type can prevent.  The formation and 
+reaction of these connections are presented in Figs. 1.19 – 1.21. 
+a. Type-1 connection 
+17 
+   
+(a) Type-1 connect ed formation  (b) Type-1 connected reaction  
+Fig. 1.19  
+b. Type-2 connect ion  
+  
+(a) Type-2 connect ed formation  (b) Type-2 connected reaction  
+Fig. 1.20  
+c. Type-3 connection 
+ 
+ 
+(a) Type-3 connect ed formation  (b) Type-3 connected reaction  
+Fig. 1.21  
+ 
+2. Complex connections  
+Complex connect ions are divided into two types including complexly -pinned 
+connection and complexly -fixed connection  (Fig. 1.22). 
+(A) (B)R
+R
+(A) (B)
+(A) Rx
+Ry
+R
+(B) (A)
+Ry
+(A)
+RRx
+R
+dM = R.d
+(A) (B)18 
+   
+(a) Complexly -pinned connection ,  
+p = 2 (b) Complexly -fixed connection ,  
+p = 3 
+Fig. 1.22  
+ 
+Complex degree  of a complex connection is the number of correspondingly  simple 
+connections. Symbol of the complex degree is p = D – 1, in which D is the number 
+of the rigid bodies that have been connected at the complex connection.  
+ 
+III. How to connect rigid bodies into a geometrically stable structure  
+For connec ting some rigid bodies to form a geometrically stable structure, we need 
+to solve two main problems. Firstly, we determine the minimum number of 
+connections used for this purpose, called the prerequisite  or necessary condition s. 
+Secondly, we need to prove that the reasonable  arrangement of these connections is 
+done or not to obtain a geometrically stable structure, called the sufficient condition s. 
+1. Prerequisite /necessary  conditions  
+For advantage in analysis, the structures can be divided into two groups namely 
+beams -frames and trusses, which are connected to the foundation ground or not 
+connected to.  
+a. For beams and frames  
+ Prefabricated beams and frames  
+Assuming that there are D rigid bodies connected by T type-1 connections, K type-
+2 connections, and H type-3 connec tions (transferred to corresponding ly simple 
+(A)
+(B)(C)
+(A)(B)(D)
+(C)19 
+ connections). A ssume a selected rigid body is the static member, using T, K, H 
+connections mentioned above to connect ( D-1) remaining rigid bodies  with the static 
+member  to form a g eometrically stable structure . Therefore, th e requirement is to 
+prevent 3( D-1) degrees of freedom and the ability to prevent ( T 2K 3H) degrees of 
+freedom. Calculate  the value n = (ability) – (requirement) = ( T 2K 3H) - 3(D-1) = 
+T 2K 3H 3-3D. Argumentation:  
+If n < 0, it means shortage of connections;  
+If n = 0, it means e nough  connections  and the structure has an ability to be 
+geometrically stable  (statically determinate structures , if yes);  
+If n > 0, it means redundancy of connections  and the structure has an ability to be 
+geometrically stable  (statically indeterminate struct ures, if yes); 
+Conclusions: n = T 2K 3H 3-3D ≥ 0       (1.1) 
+ Beams and frames connected to foundation ground  
+Solving the problem as same as the subsection above with a consideration that the 
+Earth is a static member  then we have conclusions as below:  
+  n = T 2K 3H C-3D ≥ 0       (1.2) 
+(C is the number of connections to the Earth, transferred to equivalent type -1 
+connections)  
+b. For trusses  
+ Trusses connected to foundation ground  
+ Assuming that a truss has D linear  members and M pinned joints  connected together 
+then to connect to the Earth using C type-1 connections.  The Earth is considered as 
+a static member, using D linear  members  (D type-1 connections) to connect  M points 
+together  and then to connect to the Earth to form a g eometrically stable structure . 
+Therefore, the requirement is to prevent 2M degrees of freedom and the ability to 20 
+ prevent ( D C) degrees of freedom. Calculate  the value n = (ability) – (requirement) 
+= (D C) – 2M = D C-2M. Argumentation:  
+If n < 0, it means shortage of connections;  
+If n = 0, it means enough con nections and the structure has an ability to be 
+geometrically stable  (statically determinate structures , if yes);  
+If n > 0, it means redundancy of connections  and the structure has an ability to be 
+geometrically stable  (statically indeterminate structures , if yes); 
+Conclusions : n = D C-2M ≥ 0        (1.3) 
+ Prefabricated trusses  
+Solving the problem as same as trusses connected to the foundation ground  with a 
+consideration that any one linear member  of the truss is a static member then we 
+have conclusions as below:  
+  n = D 3-2M ≥ 0        (1.4) 
+2. Suffic ient conditions  
+There are reason able arrangements for the used  connections after satisfying the 
+prerequisite /necessary  condition s as some ca ses analyzed  as below:  
+a. Connecting a point to a rigid body to form a geometrically stable structure  
+Using two type -1 connections arranged in two different directions , called a couple,  
+to connect a point to a rigid body satisfies both the prerequisite  (necessary) condition 
+and sufficient condition.  For example, the geometrically stable  structure and 
+geometrically unstable  structur e are shown in Fig. 1.23.  
+ Couple ’s characteristics : When adding  into or elimina ting out of a structure  
+one or many couples , it does not change the geometric ally (in)stable  
+characteristics of the structure.  21 
+   
+(a) Geometrically stable  structure  (b) Geometrically instable  structure  
+Fig. 1.23  
+b. Connecting two rigid bodies together to form a geometrically stable structure  
+To connect two rigid bodies together to form a g eometrically stable structure , the 
+prerequisite  and sufficient conditions are to use at least three equivalent type-1 
+connections and to arrange in a reasonable  way. There are three cases as presented 
+below:  
+ Use three  type-1 connections with their axis directions are not parallel  together 
+or intersectional at a point  (Fig. 1.24a); 
+ Use one pinned connection and on e type -1 connection with its axis direction 
+does no t pass by the pinned connection  (Fig. 1.24b); 
+ Use only one fixed connection at any contact point between the two rigid 
+bodies  (Fig. 1.24c). 
+If we use three type-1 connections with their axis directions are parallel together or 
+intersectional at a point , the connected structure will be geometrically instable (Fig. 
+1.25).  
+   
+(a) Three type -1 (b) A pin and one type -1 (c) One fixed  
+Fig. 1.24  
+(A) (B)
+(A) (B)
+(A) (B)Couple   22 
+    
+(a) Intersectional (b) Parallel (l1, l2, l3) (c) Parallel (l = const.) 
+Fig. 1 .25 
+c. Connecting three rigid bodies together to form a geometrically stable structure  
+There are two connected ways including the in-order connection and round -robin 
+connection.  In which,  
+ For in -order connection, we can use the way of two -member connection  in 
+twice  (Fig. 1.26a).  
+ For round -robin connection, there are three connections in the three -member 
+structure. The necessary  and sufficient conditions to connect three structural 
+members together to form a g eometrically stable structure  is to use three 
+pinned connecti ons (real or virtual) that do not l ie in the same  straight line  
+(Fig. 1.26b). 
+   
+ 
+(a) In -order connections  (b) Round -robin connections  
+Fig. 1. 26 
+In the case of round -robin connection, if three pinned connections lie in a straight 
+line, the formed structure is a g eometrically instable structure , as can be seen in Fig. 
+1.27.  
+(A) (B)
+(A) (B)
+(B) (A)
+(A) (B)
+(C)
+(A) (B)
+(C)
+(B) (A)(C)
+(A)(B)(C)23 
+   
+(a) Using a  real pin and two virtual 
+pins (b) Using t hree real pins  
+Fig. 1.27  
+Notes: In the case of connecting more than three rigid b odies or structural members  
+together, we should utilize the couple ’s characteristics to reduce the number of  rigid 
+bodies. Based on that,  we can partially or fully analyze the given structure using 
+three cases abovementioned to determine the geometrically (in)stable characteristics 
+of the structure.  
+ 
+IV. Problems for applica tion 
+1. Problem 1  
+Consider the geometrically (in)stable characteristics of the structure given in Fig. 
+1.28a.  
+(A)(B)(C)
+(A)(B) (C)24 
+   
+(a) The given structure  (b) The geometrically stable structure  
+Fig. 1.28  
+Solving  
+a. Prerequisite condition  
+The given structure is a pin -conn ected frame that is connected to the Earth , hence  
+use the formula (1.2) to check the prerequisite condition. Here, we have D = 2, T = 
+2, K = 0, H = 0 and C = 2*2 = 4, then n = 2 2*0 3*0 4 -3*2 = 0. It is Ok!  
+b. Sufficient condition  
+The Earth considered as a  rigid body (I) is connected with two other rigid bodies (II) 
+and (III). As can be seen in Fig. 1.28b, three rigid bodies are round -robin (ly) 
+connected together by three pinned connections (1,2), (1,3), and (2,3) . Connecting 
+these three points will create a triangular so the given structure is geometrically 
+stable.  
+ 
+2. Problem 2  
+Consider the geometrically (in)stable characteristics of a truss given in Fig. 1.29a.  
+2m 2m 2m
+2m 2m 2m 2m
+(I)(II)
+(1,3)(2,3)
+(1,2)(III)25 
+   
+(a) A given truss  (b) The geometrically instable structure  
+Fig. 1.29  
+Solving  
+a. Prerequisite  condition  
+This is a prefabricated truss so we can check the prerequisite condition by using the 
+formula (1.4). Determine D = 42, M = 22 then n = 42 3 -2*22 =  1 > 0. It is Ok!  
+b. Sufficient condition  
+Step by step eliminating couples , we have a simpler struct ure as shown in Fig. 1.29b. 
+In which, two rigid bodies (I) and (II) are connected together by two type-1 
+connections having parallel axis directions. Therefore, it is a geometrically instable 
+structure (collapse).  
+ 
+3. Problem 3    
+Consider the geometrically (in)stable characteristics of a complex structure given in 
+Fig. 1.30.  
+26 
+  
+Fig. 1.30  
+Solving  
+a. Prerequisite condition  
+This is a complex frame structure connected to the Earth, so we can check the 
+prerequisite condition by using the formula (1.2).  
+ Way 1: Assu ming D = 6, then T = 0, K = 3, H = 2, and C = 2*(2 1) = 6 ; hence 
+n = 0 2*3 3*2 6 -3*6 = 0. It is Ok!  
+ Way 2: Assuming D = 2, then T = 0, K = 1, H = 0, and C = 4*1 = 4; hence n 
+= 0 2*1 3*0 4 -3*2 = 0. It is Ok!  
+b. Sufficient condition  
+There are three rigid bod ies including the Earth, (BDC) and (DF), we need to 
+determine the geometrically (in)stable characteristics of the whole structure.  
+ Way 1: (In-order connection)  
+Connect the Earth to (BDC) using three type -1 connections (AB, DE and type -1 
+connection at point  C). Since their axis directions are not parallel  and intersectional, 
+so the Earth and (BDC) connected to form a new rigid body (I). Finally, (I) and (DF) 
+are connected by one pinned connection at D and one type -1 connection at F with 
+its axis direction do es not pass by the pinned connection  at D. Therefore, the given 
+structure is geometrically stable.  
+ Way 2: (Round -robin connection)  
+27 
+ Three rigid bodies including the Earth, (BDC) and (DF) are connected together by 
+three virtually pinned connections. These virtual  pins do not lie in the same straight 
+line, so the given structure is geometrically stable.  
+ 

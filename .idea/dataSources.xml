@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="vector_db@dbtest.qmykx.mongodb.net" uuid="c1fbaa7e-1d1f-42e6-bca9-3d56b1b18acf">
+      <driver-ref>mongo</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.dbschema.MongoJdbcDriver</jdbc-driver>
+      <jdbc-url>mongodb+srv://dbtest.qmykx.mongodb.net/vector_db?retryWrites=true&amp;w=majority&amp;tls=true&amp;tlsAllowInvalidCertificates=true&amp;appName=dbtest&amp;serverSelectionTimeoutMS=5000</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+  </component>
+</project>
