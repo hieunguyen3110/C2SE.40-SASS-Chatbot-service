@@ -11,7 +11,7 @@ class QueryDB:
         self.collection = self.db[dbCollection]
 
     def insert_data(self,contents):
-        self.collection.insert_many([{"title": doc["title"],"content": doc["content"],"file_name": doc["file_name"], "embeddings": doc["embeddings"]} for doc in contents])
+        self.collection.insert_many([{"title": doc["title"],"content": doc["content"],"file_name": doc["file_name"],"doc_id": doc["doc_id"], "embeddings": doc["embeddings"]} for doc in contents])
 
     def clear_data(self):
         self.collection.delete_many({})

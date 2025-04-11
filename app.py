@@ -1,15 +1,16 @@
 from mimetypes import guess_extension
 import os
 from xmlrpc.client import Error
-
 from flask import Flask, jsonify, request, abort
 from dotenv import load_dotenv
 import requests
 from flask_cors import CORS
-
 from db import QueryDB
 from rag.core import RAG
 from embeddings import EmbeddingConfig, SentenceTransformerEmbedding
+from request.CheckFileRequest import CheckFileRequest
+from request.UploadFileRequest import UploadFileRequest
+from response.ApiRespone import ApiResponse
 from semantic_router import SemanticRouter, Route
 from semantic_router.samples import productsSample, chitchatSample
 import google.generativeai as genai
@@ -29,7 +30,7 @@ load_dotenv()
 # CORS(app)
 CORS(
     app,
-    resources={r"/api/*": {"origins": ["http://localhost:5173", "http://localhost:8088"]}},
+    resources={r"/api/*": {"origins": ["http://localhost:5173", "http://localhost:8088", "http://localhost:8084"]}},
     methods=["GET", "POST", "PUT"],
     allow_headers=["Content-Type", "Authorization"],
     supports_credentials=True,
@@ -39,35 +40,29 @@ MONGODB_URI = "mongodb+srv://hieu3110:Hieu31102003@dbtest.qmykx.mongodb.net/?ret
 DB_NAME = "vector_db"
 DB_COLLECTION = "documents"
 LLM_KEY = "AIzaSyCWvC0YT21YdAfFQgM9Si7Ad7mNK1PINgA"
-# EMBEDDING_MODEL = 'keepitreal/vietnamese-sbert'
 EMBEDDING_MODEL= 'sentence-transformers/all-mpnet-base-v2'
 
 # --- Semantic Router Setup --- #
-
 PRODUCT_ROUTE_NAME = 'products'
 CHITCHAT_ROUTE_NAME = 'chitchat'
+BASE_URL="/api/v1/chatbot"
 
 embeddingConfig= EmbeddingConfig(name=EMBEDDING_MODEL)
 productRoute = Route(name=PRODUCT_ROUTE_NAME, samples=productsSample)
 chitchatRoute = Route(name=CHITCHAT_ROUTE_NAME, samples=chitchatSample)
 semanticRouter = SemanticRouter(embedding=SentenceTransformerEmbedding(config=embeddingConfig), routes=[productRoute, chitchatRoute])
 
-with open("/Users/pro/Documents/CAPSTONE2/sass-microservice/Chatbot-service/resources/sensitive-words.txt", "r", encoding="utf-8") as f:
+with open("/Users/pro/Documents/CAPSTONE2/AI-agent/Chatbot-service/resources/sensitive-words.txt", "r", encoding="utf-8") as f:
     sensitive_words = set(line.strip().lower() for line in f if line.strip())
 # --- End Semantic Router Setup --- #
 
-
 # --- Set up LLMs --- #
-
 genai.configure(api_key=LLM_KEY)
 llm = genai.GenerativeModel('gemini-1.5-pro')
-
 # --- End Set up LLMs --- #
 
 # --- Relection Setup --- #
-
 reflection = Reflection(llm=llm)
-
 # --- End Reflection Setup --- #
 
 
@@ -157,61 +152,67 @@ def hello_world():
     })
 
 
-@app.route("/api/upload-file", methods=['POST'])
+@app.route(f"{BASE_URL}/upload-file", methods=['POST'])
 def send_file():
     try:
         # Fetch the file
         data= request.get_json()
-        file_url= data.get("filePath")
-        file_name = data.get("fileName")
+        if not data:
+            return ApiResponse.error(message="No data provided", code=400)
+        data_request= UploadFileRequest(**data)
+        file_url= data_request.filePath
+        file_name = data_request.fileName
         response = requests.get(file_url)
         if response.status_code != 200:
-            abort(404, description="File not found or inaccessible")
+            return ApiResponse.error(message="File not found or inaccessible", code=404)
 
         # Check content type and determine file extension
         content_type_res = response.headers.get('Content-Type')
         if content_type_res:
             extension = guess_extension(content_type_res.split(";")[0])
             if extension in ['.pdf', '.docx']:
-                temp_file_path = f"/Users/pro/Documents/CAPSTONE1/chatbotRAG/resources/temp_download_file{extension}"
+                temp_file_path = f"/Users/pro/Documents/CAPSTONE2/AI-agent/Chatbot-service/resources/temp_download_file{extension}"
                 # Save the file locally
                 with open(temp_file_path, "wb") as f:
                     f.write(response.content)
-
                 # Process the file
                 result = ReadFile(document_file=temp_file_path, extension=extension,file_name=file_name)
                 processed_result = result.read_file()
                 for content in processed_result:
                     embeddings = rag.get_embedding(content["content"])
                     content["embeddings"] = embeddings
+                    content["doc_id"]=data_request.docId
 
                 query_db.insert_data(processed_result)
-                return jsonify({"message": "File processed successfully", "result": processed_result}), 200
+                return ApiResponse.success(message="File processed successfully",
+                                           data="Upload file success")
             else:
-                abort(400, description="File type not valid")
+                return ApiResponse.error(message="File type not supported", code=400)
         else:
-            abort(400, description="Content-Type not found in response headers")
+            return ApiResponse.error(message="Content-Type not found in response headers",code=400)
     except requests.exceptions.RequestException as e:
-        abort(401, description=f"Something went wrong: {e}")
+        return ApiResponse.error(message=f"Something went wrong: {str(e)}", code=401)
 
-@app.route("/api/check-file", methods=['POST'])
+@app.route(f"{BASE_URL}/check-file", methods=['POST'])
 def check_file():
     try:
         # Lấy dữ liệu từ request
         data = request.get_json()
-        file_url = data.get("filePath")
-        if not file_url:
-            return jsonify({"error": "File URL is required"}), 400
+        if not data:
+            return ApiResponse.error(message="No file provided", code=400)
+        data_request = CheckFileRequest(**data)
+        if not data_request.filePath:
+            return ApiResponse.error(message="File URL is required", code=400)
 
         # Tải file từ URL
-        response = requests.get(file_url)
+        response = requests.get(data_request.filePath)
         if response.status_code != 200:
-            return jsonify({"error": "Failed to fetch file from URL"}), 404
+            return ApiResponse.error(message="Failed to fetch file from URL", code=404)
 
         # Kiểm tra loại file
         content_type = response.headers.get('Content-Type')
         if not content_type or 'application/pdf' not in content_type:
-            return jsonify({"error": "Only PDF files are supported"}), 400
+            return ApiResponse.error(message="Only PDF files are supportedL", code=400)
 
         # Lưu file tạm thời
         with NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
@@ -225,7 +226,7 @@ def check_file():
             for page in reader.pages:
                 text += page.extract_text()
         except Exception as e:
-            return jsonify({"error": "Failed to read PDF file", "details": str(e)}), 500
+            return ApiResponse.error(message=f"Failed to read PDF file: {str(e)}", code=500)
         finally:
             # Xóa file tạm sau khi xử lý
             os.remove(temp_file_path)
@@ -237,14 +238,14 @@ def check_file():
         found_words = words_in_text.intersection(sensitive_words)
         print(found_words)
         if found_words:
-            return jsonify({"containsSensitiveWords": True, "sensitiveWords": list(found_words)}), 200
+            return ApiResponse.success(data= {"containsSensitiveWords": True, "sensitiveWords": list(found_words)})
         else:
-            return jsonify({"containsSensitiveWords": False}), 200
+            return ApiResponse.success(data={"containsSensitiveWords": False, "sensitiveWords": None})
 
     except requests.exceptions.RequestException as e:
-        return jsonify({"error": "Error while fetching the file", "details": str(e)}), 400
+        return ApiResponse.error(message=f"Error while fetching the file: {str(e)}", code=400)
     except Exception as e:
-        return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
+        return ApiResponse.error(message=f"An unexpected error occurred: {str(e)}", code=500)
 
 @app.route("/api/v1/get-solutions", methods=['POST'])
 def handle_offer_improved_solutions():

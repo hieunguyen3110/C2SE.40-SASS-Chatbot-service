@@ -34,7 +34,8 @@ class RAG:
     def vector_search(
             self, 
             user_query: str, 
-            limit=4):
+            limit=4,
+            file_filter=None):
         """
         Perform a vector search in the MongoDB collection based on the user query.
 
@@ -52,15 +53,28 @@ class RAG:
             return "Invalid query or embedding generation failed."
 
         # Define the vector search pipeline
+        # vector_search_stage = {
+        #     "$vectorSearch": {
+        #         "index": "vector_index",
+        #         "queryVector": query_embedding,
+        #         "path": "embeddings",
+        #         "numCandidates": 500,
+        #         "limit": limit,
+        #     }
+        # }
         vector_search_stage = {
             "$vectorSearch": {
                 "index": "vector_index",
                 "queryVector": query_embedding,
                 "path": "embeddings",
-                "numCandidates": 500,
+                "numCandidates": 1000,
                 "limit": limit,
+                "scoreThreshold": 0.75
             }
         }
+        # Optional: lọc theo file
+        if file_filter:
+            vector_search_stage["$vectorSearch"]["filter"] = {"file_name": file_filter}
 
         unset_stage = {
             "$unset": "embeddings"
@@ -70,7 +84,7 @@ class RAG:
             "$project": {
                 "_id": 0,  
                 "title": 1,
-                # "product_specs": 1,
+                "doc_id": 1,
                 "content": 1,
                 "file_name":1,
                 "score": {
@@ -89,22 +103,33 @@ class RAG:
         get_knowledge = self.vector_search(query.text, 10)
         enhanced_prompt = ""
         i = 0
-        for result in get_knowledge:
-            if result.get('title'):
-                i += 1
-                enhanced_prompt += f"\n {i}) tiêu đề: {result.get('title')}"
-                if result.get('file_name'):
-                    file_source.append(result.get('file_name'))
-                    print(f"Appended file_name: {result.get('file_name')}")  # Debug
-                    enhanced_prompt += f", tham chiếu từ tài liệu : {result.get('file_name')}"
+        # for result in get_knowledge:
+        #     if result.get('title'):
+        #         i += 1
+        #         enhanced_prompt += f"\n {i}) Nội dung ở trang: {result.get('title')}"
+        #         if result.get('file_name'):
+        #             file_source.append(result.get('file_name'))
+        #             print(f"Appended file_name: {result.get('file_name')}")  # Debug
+        #             enhanced_prompt += f", tham chiếu từ tài liệu : {result.get('file_name')}"
+        #
+        #         if result.get('content'):
+        #             enhanced_prompt += f", nội dung : {result.get('content')}"
+        #         else:
+        #             enhanced_prompt += f", hiện tại, tôi chưa biết về câu hỏi"
+        for i, result in enumerate(get_knowledge, start=1):
+            title = result.get("title", f"Không rõ trang {i}")
+            file_name = result.get("file_name")
+            content = result.get("content", "hiện tại, tôi chưa biết về câu hỏi")
 
-                if result.get('content'):
-                    enhanced_prompt += f", nội dung : {result.get('content')}"
-                else:
-                    # Mock up data
-                    # Retrieval model pricing from the internet.
-                    enhanced_prompt += f", hiện tại, tôi chưa biết về câu hỏi"
+            # Gộp prompt theo thứ tự gọn gàng
+            enhanced_prompt += f"\n {i}) Nội dung ở trang: {title}"
 
+            if file_name:
+                file_source.append(file_name)
+                print(f"Appended file_name: {file_name}")
+                enhanced_prompt += f", tham chiếu từ tài liệu: {file_name}"
+
+            enhanced_prompt += f", nội dung: {content}"
         return enhanced_prompt
 
     def generate_content(self, prompt):
