@@ -52,13 +52,17 @@ productRoute = Route(name=PRODUCT_ROUTE_NAME, samples=productsSample)
 chitchatRoute = Route(name=CHITCHAT_ROUTE_NAME, samples=chitchatSample)
 semanticRouter = SemanticRouter(embedding=SentenceTransformerEmbedding(config=embeddingConfig), routes=[productRoute, chitchatRoute])
 
-with open("/Users/pro/Documents/CAPSTONE2/AI-agent/Chatbot-service/resources/sensitive-words.txt", "r", encoding="utf-8") as f:
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SENSITIVE_WORDS_PATH = os.path.join(BASE_DIR, "resources", "sensitive-words.txt")
+TEMP_FILE_PATH = os.path.join(BASE_DIR, "resources", "temp_download_file")
+
+with open(SENSITIVE_WORDS_PATH, "r", encoding="utf-8") as f:
     sensitive_words = set(line.strip().lower() for line in f if line.strip())
 # --- End Semantic Router Setup --- #
 
 # --- Set up LLMs --- #
 genai.configure(api_key=LLM_KEY)
-llm = genai.GenerativeModel('gemini-1.5-pro')
+llm = genai.GenerativeModel('gemini-2.0-flash')
 # --- End Set up LLMs --- #
 
 # --- Relection Setup --- #
@@ -96,7 +100,7 @@ def call_llm_query(user_query, prompt):
     return response
 
 
-@app.route('/api/search', methods=['POST'])
+@app.route(f'{BASE_URL}/search', methods=['POST'])
 def handle_query():
     try:
         data = [request.get_json()]
@@ -143,7 +147,7 @@ def handle_query():
     except requests.exceptions.RequestException as e:
         abort(401, description=f"Something went wrong: {e}")
 
-@app.route('/api/clear-data')
+@app.route(f'{BASE_URL}/clear-data')
 def hello_world():
     # put application's code here
     query_db.clear_data()
@@ -171,7 +175,7 @@ def send_file():
         if content_type_res:
             extension = guess_extension(content_type_res.split(";")[0])
             if extension in ['.pdf', '.docx']:
-                temp_file_path = f"/Users/pro/Documents/CAPSTONE2/AI-agent/Chatbot-service/resources/temp_download_file{extension}"
+                temp_file_path = TEMP_FILE_PATH + extension
                 # Save the file locally
                 with open(temp_file_path, "wb") as f:
                     f.write(response.content)
@@ -247,7 +251,7 @@ def check_file():
     except Exception as e:
         return ApiResponse.error(message=f"An unexpected error occurred: {str(e)}", code=500)
 
-@app.route("/api/v1/get-solutions", methods=['POST'])
+@app.route(f"{BASE_URL}/get-solutions", methods=['POST'])
 def handle_offer_improved_solutions():
     try:
         data = request.get_json()
@@ -276,7 +280,6 @@ def handle_offer_improved_solutions():
         )
     except Error as e:
         abort(400, "Error when providing solutions for students.")
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5002, debug=True)

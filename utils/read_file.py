@@ -1,7 +1,6 @@
 import re
-import math
+
 import fitz
-from numpy.ma.extras import average
 
 
 class ReadFile:
