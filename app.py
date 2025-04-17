@@ -20,6 +20,7 @@ from langdetect import detect
 from PyPDF2 import PdfReader
 from tempfile import NamedTemporaryFile
 import re
+import json
 
 
 
@@ -148,13 +149,12 @@ def handle_query():
         abort(401, description=f"Something went wrong: {e}")
 
 @app.route(f'{BASE_URL}/clear-data')
-def hello_world():
+def clear_data():
     # put application's code here
     query_db.clear_data()
     return jsonify({
         "message": "clear data successful"
     })
-
 
 @app.route(f"{BASE_URL}/upload-file", methods=['POST'])
 def send_file():
@@ -280,6 +280,40 @@ def handle_offer_improved_solutions():
         )
     except Error as e:
         abort(400, "Error when providing solutions for students.")
+
+@app.route(f"{BASE_URL}/document/generate-question", methods=['GET'])
+def handle_generate_question():
+    try:
+        doc_ids = request.args.get("docIds")
+        if doc_ids:
+            doc_ids_list = doc_ids.split(",")
+            doc_ids_list = [int(doc_id) for doc_id in doc_ids_list]
+        else:
+            return {"error": "No docIds provided"}, 400
+        documents = query_db.get_document_by_id(doc_ids_list)
+        full_text = "".join([doc["content"] for doc in documents])
+        words= ReadFile.clean_and_tokenize(ReadFile(),full_text)
+        max_chunk_size = 4000
+        responses= []
+        list_question= []
+        if len(words) > max_chunk_size:
+            word_chunks = [words[i:i + max_chunk_size] for i in range(0, len(words), max_chunk_size)]
+        else:
+            word_chunks = [words]
+
+        for i,word in enumerate(word_chunks):
+            print(f"🔹Get question {i+1}/{len(word_chunks)}...")
+            get_prompt = rag.create_prompt_get_question(word)
+            response= call_llm_query("Take multiple choice questions from the document",get_prompt)
+            responses.append(response.text)
+
+        for response in responses:
+            questions= ReadFile.extract_questions_and_answers(response)
+            list_question= list_question + questions
+
+        return ApiResponse.success(data=list_question)
+    except Exception as e:
+        return ApiResponse.error(message=f"An unexpected error occurred: {str(e)}", code=500)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5002, debug=True)

@@ -1,5 +1,4 @@
 import pymongo
-import google.generativeai as genai
 from IPython.display import Markdown
 import textwrap
 from embeddings import SentenceTransformerEmbedding, EmbeddingConfig
@@ -135,6 +134,7 @@ class RAG:
     def generate_content(self, prompt):
         return self.llm.generate_content(prompt)
 
+    @staticmethod
     def _to_markdown(text):
         text = text.replace('•', '  *')
         return Markdown(textwrap.indent(text, '> ', predicate=lambda _: True))
@@ -177,6 +177,51 @@ class RAG:
 
         Lưu ý: Hãy đưa ra những đề xuất thực tế và khả thi, phù hợp với phong cách học của sinh viên. Các đề xuất nên cụ thể và có thể hành động được.
         """
+        return prompt
+
+    @staticmethod
+    def create_prompt_get_question(words, n=5):
+        prompt = f"""
+        Dưới đây là danh sách các từ quan trọng được trích xuất từ văn bản gốc. Dựa trên những từ này, vui lòng tạo ra ít nhất {n} câu hỏi trắc nghiệm với cấu trúc rõ ràng, dễ dàng cho hệ thống front-end trích xuất. Mỗi câu hỏi cần có 4 lựa chọn (A, B, C, D), trong đó chỉ có một câu trả lời đúng.
+
+        Định dạng trả về câu hỏi:
+        {{
+            "questions": [
+                {{
+                    "question": "Câu hỏi 1?",
+                    "options": {{
+                        "A": "Lựa chọn A",
+                        "B": "Lựa chọn B",
+                        "C": "Lựa chọn C",
+                        "D": "Lựa chọn D"
+                    }},
+                    "correct_answer": "A"
+                }},
+                {{
+                    "question": "Câu hỏi 2?",
+                    "options": {{
+                        "A": "Lựa chọn A",
+                        "B": "Lựa chọn B",
+                        "C": "Lựa chọn C",
+                        "D": "Lựa chọn D"
+                    }},
+                    "correct_answer": "B"
+                }},
+                ...
+            ]
+        }}
+
+        Danh sách từ đã trích xuất:
+        {words}
+
+        Lưu ý:
+        - Tạo ít nhất {n} câu hỏi trắc nghiệm.
+        - Nếu có thể tạo ra nhiều câu hỏi hơn, mặc định hãy tạo {n} câu hỏi.
+        - Đảm bảo các câu hỏi có tính chất thách thức và không dễ dàng đoán được đáp án đúng.
+        - Câu trả lời đúng phải được xác định rõ trong mỗi câu hỏi.
+        - Câu hỏi có thể xoay quanh các định nghĩa, khái niệm, hoặc ứng dụng của các từ được trích xuất.
+        """
+
         return prompt
 
     @staticmethod
