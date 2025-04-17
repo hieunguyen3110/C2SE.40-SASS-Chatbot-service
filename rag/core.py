@@ -1,5 +1,4 @@
 import pymongo
-import google.generativeai as genai
 from IPython.display import Markdown
 import textwrap
 from embeddings import SentenceTransformerEmbedding, EmbeddingConfig
@@ -34,7 +33,8 @@ class RAG:
     def vector_search(
             self, 
             user_query: str, 
-            limit=4):
+            limit=4,
+            file_filter=None):
         """
         Perform a vector search in the MongoDB collection based on the user query.
 
@@ -52,15 +52,28 @@ class RAG:
             return "Invalid query or embedding generation failed."
 
         # Define the vector search pipeline
+        # vector_search_stage = {
+        #     "$vectorSearch": {
+        #         "index": "vector_index",
+        #         "queryVector": query_embedding,
+        #         "path": "embeddings",
+        #         "numCandidates": 500,
+        #         "limit": limit,
+        #     }
+        # }
         vector_search_stage = {
             "$vectorSearch": {
                 "index": "vector_index",
                 "queryVector": query_embedding,
                 "path": "embeddings",
-                "numCandidates": 500,
+                "numCandidates": 1000,
                 "limit": limit,
+                "scoreThreshold": 0.75
             }
         }
+        # Optional: lọc theo file
+        if file_filter:
+            vector_search_stage["$vectorSearch"]["filter"] = {"file_name": file_filter}
 
         unset_stage = {
             "$unset": "embeddings"
@@ -70,7 +83,7 @@ class RAG:
             "$project": {
                 "_id": 0,  
                 "title": 1,
-                # "product_specs": 1,
+                "doc_id": 1,
                 "content": 1,
                 "file_name":1,
                 "score": {
@@ -89,27 +102,39 @@ class RAG:
         get_knowledge = self.vector_search(query.text, 10)
         enhanced_prompt = ""
         i = 0
-        for result in get_knowledge:
-            if result.get('title'):
-                i += 1
-                enhanced_prompt += f"\n {i}) tiêu đề: {result.get('title')}"
-                if result.get('file_name'):
-                    file_source.append(result.get('file_name'))
-                    print(f"Appended file_name: {result.get('file_name')}")  # Debug
-                    enhanced_prompt += f", tham chiếu từ tài liệu : {result.get('file_name')}"
+        # for result in get_knowledge:
+        #     if result.get('title'):
+        #         i += 1
+        #         enhanced_prompt += f"\n {i}) Nội dung ở trang: {result.get('title')}"
+        #         if result.get('file_name'):
+        #             file_source.append(result.get('file_name'))
+        #             print(f"Appended file_name: {result.get('file_name')}")  # Debug
+        #             enhanced_prompt += f", tham chiếu từ tài liệu : {result.get('file_name')}"
+        #
+        #         if result.get('content'):
+        #             enhanced_prompt += f", nội dung : {result.get('content')}"
+        #         else:
+        #             enhanced_prompt += f", hiện tại, tôi chưa biết về câu hỏi"
+        for i, result in enumerate(get_knowledge, start=1):
+            title = result.get("title", f"Không rõ trang {i}")
+            file_name = result.get("file_name")
+            content = result.get("content", "hiện tại, tôi chưa biết về câu hỏi")
 
-                if result.get('content'):
-                    enhanced_prompt += f", nội dung : {result.get('content')}"
-                else:
-                    # Mock up data
-                    # Retrieval model pricing from the internet.
-                    enhanced_prompt += f", hiện tại, tôi chưa biết về câu hỏi"
+            # Gộp prompt theo thứ tự gọn gàng
+            enhanced_prompt += f"\n {i}) Nội dung ở trang: {title}"
 
+            if file_name:
+                file_source.append(file_name)
+                print(f"Appended file_name: {file_name}")
+                enhanced_prompt += f", tham chiếu từ tài liệu: {file_name}"
+
+            enhanced_prompt += f", nội dung: {content}"
         return enhanced_prompt
 
     def generate_content(self, prompt):
         return self.llm.generate_content(prompt)
 
+    @staticmethod
     def _to_markdown(text):
         text = text.replace('•', '  *')
         return Markdown(textwrap.indent(text, '> ', predicate=lambda _: True))
@@ -152,6 +177,51 @@ class RAG:
 
         Lưu ý: Hãy đưa ra những đề xuất thực tế và khả thi, phù hợp với phong cách học của sinh viên. Các đề xuất nên cụ thể và có thể hành động được.
         """
+        return prompt
+
+    @staticmethod
+    def create_prompt_get_question(words, n=5):
+        prompt = f"""
+        Dưới đây là danh sách các từ quan trọng được trích xuất từ văn bản gốc. Dựa trên những từ này, vui lòng tạo ra ít nhất {n} câu hỏi trắc nghiệm với cấu trúc rõ ràng, dễ dàng cho hệ thống front-end trích xuất. Mỗi câu hỏi cần có 4 lựa chọn (A, B, C, D), trong đó chỉ có một câu trả lời đúng.
+
+        Định dạng trả về câu hỏi:
+        {{
+            "questions": [
+                {{
+                    "question": "Câu hỏi 1?",
+                    "options": {{
+                        "A": "Lựa chọn A",
+                        "B": "Lựa chọn B",
+                        "C": "Lựa chọn C",
+                        "D": "Lựa chọn D"
+                    }},
+                    "correct_answer": "A"
+                }},
+                {{
+                    "question": "Câu hỏi 2?",
+                    "options": {{
+                        "A": "Lựa chọn A",
+                        "B": "Lựa chọn B",
+                        "C": "Lựa chọn C",
+                        "D": "Lựa chọn D"
+                    }},
+                    "correct_answer": "B"
+                }},
+                ...
+            ]
+        }}
+
+        Danh sách từ đã trích xuất:
+        {words}
+
+        Lưu ý:
+        - Tạo ít nhất {n} câu hỏi trắc nghiệm.
+        - Nếu có thể tạo ra nhiều câu hỏi hơn, mặc định hãy tạo {n} câu hỏi.
+        - Đảm bảo các câu hỏi có tính chất thách thức và không dễ dàng đoán được đáp án đúng.
+        - Câu trả lời đúng phải được xác định rõ trong mỗi câu hỏi.
+        - Câu hỏi có thể xoay quanh các định nghĩa, khái niệm, hoặc ứng dụng của các từ được trích xuất.
+        """
+
         return prompt
 
     @staticmethod

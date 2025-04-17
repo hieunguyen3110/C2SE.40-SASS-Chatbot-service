@@ -1,15 +1,16 @@
 from mimetypes import guess_extension
 import os
 from xmlrpc.client import Error
-
 from flask import Flask, jsonify, request, abort
 from dotenv import load_dotenv
 import requests
 from flask_cors import CORS
-
 from db import QueryDB
 from rag.core import RAG
 from embeddings import EmbeddingConfig, SentenceTransformerEmbedding
+from request.CheckFileRequest import CheckFileRequest
+from request.UploadFileRequest import UploadFileRequest
+from response.ApiRespone import ApiResponse
 from semantic_router import SemanticRouter, Route
 from semantic_router.samples import productsSample, chitchatSample
 import google.generativeai as genai
@@ -19,6 +20,7 @@ from langdetect import detect
 from PyPDF2 import PdfReader
 from tempfile import NamedTemporaryFile
 import re
+import json
 
 
 
@@ -29,7 +31,7 @@ load_dotenv()
 # CORS(app)
 CORS(
     app,
-    resources={r"/api/*": {"origins": ["http://localhost:5173", "http://localhost:8088"]}},
+    resources={r"/api/*": {"origins": ["http://localhost:5173", "http://localhost:8088", "http://localhost:8084"]}},
     methods=["GET", "POST", "PUT"],
     allow_headers=["Content-Type", "Authorization"],
     supports_credentials=True,
@@ -39,35 +41,33 @@ MONGODB_URI = "mongodb+srv://hieu3110:Hieu31102003@dbtest.qmykx.mongodb.net/?ret
 DB_NAME = "vector_db"
 DB_COLLECTION = "documents"
 LLM_KEY = "AIzaSyCWvC0YT21YdAfFQgM9Si7Ad7mNK1PINgA"
-# EMBEDDING_MODEL = 'keepitreal/vietnamese-sbert'
 EMBEDDING_MODEL= 'sentence-transformers/all-mpnet-base-v2'
 
 # --- Semantic Router Setup --- #
-
 PRODUCT_ROUTE_NAME = 'products'
 CHITCHAT_ROUTE_NAME = 'chitchat'
+BASE_URL="/api/v1/chatbot"
 
 embeddingConfig= EmbeddingConfig(name=EMBEDDING_MODEL)
 productRoute = Route(name=PRODUCT_ROUTE_NAME, samples=productsSample)
 chitchatRoute = Route(name=CHITCHAT_ROUTE_NAME, samples=chitchatSample)
 semanticRouter = SemanticRouter(embedding=SentenceTransformerEmbedding(config=embeddingConfig), routes=[productRoute, chitchatRoute])
 
-with open("/Users/pro/Documents/CAPSTONE2/sass-microservice/Chatbot-service/resources/sensitive-words.txt", "r", encoding="utf-8") as f:
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SENSITIVE_WORDS_PATH = os.path.join(BASE_DIR, "resources", "sensitive-words.txt")
+TEMP_FILE_PATH = os.path.join(BASE_DIR, "resources", "temp_download_file")
+
+with open(SENSITIVE_WORDS_PATH, "r", encoding="utf-8") as f:
     sensitive_words = set(line.strip().lower() for line in f if line.strip())
 # --- End Semantic Router Setup --- #
 
-
 # --- Set up LLMs --- #
-
 genai.configure(api_key=LLM_KEY)
-llm = genai.GenerativeModel('gemini-1.5-pro')
-
+llm = genai.GenerativeModel('gemini-2.0-flash')
 # --- End Set up LLMs --- #
 
 # --- Relection Setup --- #
-
 reflection = Reflection(llm=llm)
-
 # --- End Reflection Setup --- #
 
 
@@ -101,7 +101,7 @@ def call_llm_query(user_query, prompt):
     return response
 
 
-@app.route('/api/search', methods=['POST'])
+@app.route(f'{BASE_URL}/search', methods=['POST'])
 def handle_query():
     try:
         data = [request.get_json()]
@@ -148,70 +148,75 @@ def handle_query():
     except requests.exceptions.RequestException as e:
         abort(401, description=f"Something went wrong: {e}")
 
-@app.route('/api/clear-data')
-def hello_world():
+@app.route(f'{BASE_URL}/clear-data')
+def clear_data():
     # put application's code here
     query_db.clear_data()
     return jsonify({
         "message": "clear data successful"
     })
 
-
-@app.route("/api/upload-file", methods=['POST'])
+@app.route(f"{BASE_URL}/upload-file", methods=['POST'])
 def send_file():
     try:
         # Fetch the file
         data= request.get_json()
-        file_url= data.get("filePath")
-        file_name = data.get("fileName")
+        if not data:
+            return ApiResponse.error(message="No data provided", code=400)
+        data_request= UploadFileRequest(**data)
+        file_url= data_request.filePath
+        file_name = data_request.fileName
         response = requests.get(file_url)
         if response.status_code != 200:
-            abort(404, description="File not found or inaccessible")
+            return ApiResponse.error(message="File not found or inaccessible", code=404)
 
         # Check content type and determine file extension
         content_type_res = response.headers.get('Content-Type')
         if content_type_res:
             extension = guess_extension(content_type_res.split(";")[0])
             if extension in ['.pdf', '.docx']:
-                temp_file_path = f"/Users/pro/Documents/CAPSTONE1/chatbotRAG/resources/temp_download_file{extension}"
+                temp_file_path = TEMP_FILE_PATH + extension
                 # Save the file locally
                 with open(temp_file_path, "wb") as f:
                     f.write(response.content)
-
                 # Process the file
                 result = ReadFile(document_file=temp_file_path, extension=extension,file_name=file_name)
                 processed_result = result.read_file()
                 for content in processed_result:
                     embeddings = rag.get_embedding(content["content"])
                     content["embeddings"] = embeddings
+                    content["doc_id"]=data_request.docId
 
                 query_db.insert_data(processed_result)
-                return jsonify({"message": "File processed successfully", "result": processed_result}), 200
+                return ApiResponse.success(message="File processed successfully",
+                                           data="Upload file success")
             else:
-                abort(400, description="File type not valid")
+                return ApiResponse.error(message="File type not supported", code=400)
         else:
-            abort(400, description="Content-Type not found in response headers")
+            return ApiResponse.error(message="Content-Type not found in response headers",code=400)
     except requests.exceptions.RequestException as e:
-        abort(401, description=f"Something went wrong: {e}")
+        return ApiResponse.error(message=f"Something went wrong: {str(e)}", code=401)
 
-@app.route("/api/check-file", methods=['POST'])
+@app.route(f"{BASE_URL}/check-file", methods=['POST'])
 def check_file():
     try:
         # Lấy dữ liệu từ request
         data = request.get_json()
-        file_url = data.get("filePath")
-        if not file_url:
-            return jsonify({"error": "File URL is required"}), 400
+        if not data:
+            return ApiResponse.error(message="No file provided", code=400)
+        data_request = CheckFileRequest(**data)
+        if not data_request.filePath:
+            return ApiResponse.error(message="File URL is required", code=400)
 
         # Tải file từ URL
-        response = requests.get(file_url)
+        response = requests.get(data_request.filePath)
         if response.status_code != 200:
-            return jsonify({"error": "Failed to fetch file from URL"}), 404
+            return ApiResponse.error(message="Failed to fetch file from URL", code=404)
 
         # Kiểm tra loại file
         content_type = response.headers.get('Content-Type')
         if not content_type or 'application/pdf' not in content_type:
-            return jsonify({"error": "Only PDF files are supported"}), 400
+            return ApiResponse.error(message="Only PDF files are supportedL", code=400)
 
         # Lưu file tạm thời
         with NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
@@ -225,7 +230,7 @@ def check_file():
             for page in reader.pages:
                 text += page.extract_text()
         except Exception as e:
-            return jsonify({"error": "Failed to read PDF file", "details": str(e)}), 500
+            return ApiResponse.error(message=f"Failed to read PDF file: {str(e)}", code=500)
         finally:
             # Xóa file tạm sau khi xử lý
             os.remove(temp_file_path)
@@ -237,16 +242,16 @@ def check_file():
         found_words = words_in_text.intersection(sensitive_words)
         print(found_words)
         if found_words:
-            return jsonify({"containsSensitiveWords": True, "sensitiveWords": list(found_words)}), 200
+            return ApiResponse.success(data= {"containsSensitiveWords": True, "sensitiveWords": list(found_words)})
         else:
-            return jsonify({"containsSensitiveWords": False}), 200
+            return ApiResponse.success(data={"containsSensitiveWords": False, "sensitiveWords": None})
 
     except requests.exceptions.RequestException as e:
-        return jsonify({"error": "Error while fetching the file", "details": str(e)}), 400
+        return ApiResponse.error(message=f"Error while fetching the file: {str(e)}", code=400)
     except Exception as e:
-        return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
+        return ApiResponse.error(message=f"An unexpected error occurred: {str(e)}", code=500)
 
-@app.route("/api/v1/get-solutions", methods=['POST'])
+@app.route(f"{BASE_URL}/get-solutions", methods=['POST'])
 def handle_offer_improved_solutions():
     try:
         data = request.get_json()
@@ -276,6 +281,39 @@ def handle_offer_improved_solutions():
     except Error as e:
         abort(400, "Error when providing solutions for students.")
 
+@app.route(f"{BASE_URL}/document/generate-question", methods=['GET'])
+def handle_generate_question():
+    try:
+        doc_ids = request.args.get("docIds")
+        if doc_ids:
+            doc_ids_list = doc_ids.split(",")
+            doc_ids_list = [int(doc_id) for doc_id in doc_ids_list]
+        else:
+            return {"error": "No docIds provided"}, 400
+        documents = query_db.get_document_by_id(doc_ids_list)
+        full_text = "".join([doc["content"] for doc in documents])
+        words= ReadFile.clean_and_tokenize(ReadFile(),full_text)
+        max_chunk_size = 4000
+        responses= []
+        list_question= []
+        if len(words) > max_chunk_size:
+            word_chunks = [words[i:i + max_chunk_size] for i in range(0, len(words), max_chunk_size)]
+        else:
+            word_chunks = [words]
+
+        for i,word in enumerate(word_chunks):
+            print(f"🔹Get question {i+1}/{len(word_chunks)}...")
+            get_prompt = rag.create_prompt_get_question(word)
+            response= call_llm_query("Take multiple choice questions from the document",get_prompt)
+            responses.append(response.text)
+
+        for response in responses:
+            questions= ReadFile.extract_questions_and_answers(response)
+            list_question= list_question + questions
+
+        return ApiResponse.success(data=list_question)
+    except Exception as e:
+        return ApiResponse.error(message=f"An unexpected error occurred: {str(e)}", code=500)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5002, debug=True)
