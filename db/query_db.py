@@ -1,5 +1,4 @@
 import pymongo
-from bson.json_util import dumps
 
 class QueryDB:
     def __init__(self,

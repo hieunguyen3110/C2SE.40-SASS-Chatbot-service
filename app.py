@@ -31,7 +31,7 @@ load_dotenv()
 # CORS(app)
 CORS(
     app,
-    resources={r"/api/*": {"origins": ["http://localhost:5173", "http://localhost:8088", "http://localhost:8084"]}},
+    resources={r"/api/*": {"origins": ["http://localhost:5173", "http://localhost:8088", "http://localhost:8084", "http://dtuforyou.xyz"]}},
     methods=["GET", "POST", "PUT"],
     allow_headers=["Content-Type", "Authorization"],
     supports_credentials=True,
