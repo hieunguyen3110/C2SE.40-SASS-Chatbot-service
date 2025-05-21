@@ -1,1 +1,1 @@
-from rag.core import RAG
+from .core import RAG

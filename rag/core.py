@@ -153,6 +153,96 @@ class RAG:
         return prompt
 
     @staticmethod
+    def create_prompt_learning_analyze(student_data, score, course_periods, subject_weakens):
+        convertParticipateIn = "Yes" if student_data.get('Participation_in_Discussions') == 0 else "No"
+        course_period_names = [item["subject_name"] for item in course_periods]
+        subject_weakens_names = [{
+            "subject_name": item["subject_name"],
+            "average_score": item["avg_score"]
+        } for item in subject_weakens]
+        prompt = f"""
+        Bạn là một trợ lý học tập thông minh có khả năng phân tích dữ liệu học tập của sinh viên và đưa ra những đề xuất cá nhân hóa để cải thiện kết quả học tập. Hãy phân tích dữ liệu sau đây:
+
+        1. Danh sách các môn học yếu: {subject_weakens_names}
+        2. Các môn học trong kỳ: {str(course_period_names)}
+        3. Dự đoán điểm cuối kỳ: {score} trên thang điểm A, B, C, D, F
+        4. Dữ liệu học tập:
+           - Số lượng khóa học online đã hoàn thành: {student_data.get('Online_Courses_Completed', 'N/A')}
+           - Tham gia vào nhóm học tập: {convertParticipateIn}
+           - Tỷ lệ hoàn thành bài tập: {student_data.get('Assignment_Completion_Rate (%)', 'N/A')}%
+           - Điểm trung bình các bài kiểm tra: {student_data.get('Exam_Score (%)', 'N/A')}%
+        
+        Dựa trên thông tin này, hãy tạo một phân tích toàn diện bao gồm các phần sau, định dạng JSON:
+        
+        ```
+        {{
+          "general_assessment": {{
+            "overall_status": "Đánh giá tổng quan về tình hình học tập hiện tại",
+            "strengths": ["Điểm mạnh 1", "Điểm mạnh 2", "..."],
+            "weaknesses": ["Điểm yếu 1", "Điểm yếu 2", "..."],
+            "risk_assessment": "Đánh giá nguy cơ học tập dựa trên các dữ liệu"
+          }},
+          "improvement_suggestions": [
+            {{
+              "focus_area": "Lĩnh vực cần cải thiện",
+              "specific_action": "Hành động cụ thể để cải thiện",
+              "expected_outcome": "Kết quả dự kiến từ việc thực hiện đề xuất"
+            }},
+            // 2-3 đề xuất tương tự
+          ],
+          "weekly_study_plan": {{
+            "short_term_goals": ["Mục tiêu ngắn hạn 1", "Mục tiêu ngắn hạn 2", "..."],
+            "long_term_goals": ["Mục tiêu dài hạn 1", "Mục tiêu dài hạn 2", "..."],
+            "daily_schedule": {{
+              "monday": {{
+                "focus_subjects": ["Môn học 1", "Môn học 2"],
+                "recommended_activities": ["Hoạt động 1", "Hoạt động 2"],
+                "study_hours": "Khung giờ đề xuất",
+              }},
+              "tuesday": {{
+                "focus_subjects": ["Môn học 1", "Môn học 2"],
+                "recommended_activities": ["Hoạt động 1", "Hoạt động 2"],
+                "study_hours": "Khung giờ đề xuất",
+              }},
+              "wednesday": {{
+                "focus_subjects": ["Môn học 1", "Môn học 2"],
+                "recommended_activities": ["Hoạt động 1", "Hoạt động 2"],
+                "study_hours": "Khung giờ đề xuất",
+              }},
+              "thursday": {{
+                "focus_subjects": ["Môn học 1", "Môn học 2"],
+                "recommended_activities": ["Hoạt động 1", "Hoạt động 2"],
+                "study_hours": "Khung giờ đề xuất",
+              }},
+              "friday": {{
+                "focus_subjects": ["Môn học 1", "Môn học 2"],
+                "recommended_activities": ["Hoạt động 1", "Hoạt động 2"],
+                "study_hours": "Khung giờ đề xuất",
+              }},
+              "saturday": {{
+                "focus_subjects": ["Môn học 1", "Môn học 2"],
+                "recommended_activities": ["Hoạt động 1", "Hoạt động 2"],
+                "study_hours": "Khung giờ đề xuất",
+              }},
+            }}
+          }},
+          "progress_tracking": {{
+            "metrics_to_monitor": ["Chỉ số theo dõi 1", "Chỉ số theo dõi 2", "..."],
+            "adjustment_strategies": ["Chiến lược điều chỉnh 1", "Chiến lược điều chỉnh 2", "..."]
+          }}
+        }}
+        ```
+        
+        Lưu ý:
+        1. Hãy đưa ra đánh giá dựa trên mối tương quan giữa các yếu tố và ảnh hưởng của chúng đến kết quả học tập.
+        2. Đưa ra các đề xuất cụ thể, phù hợp với điểm yếu đã xác định.
+        3. Kế hoạch học tập phải khả thi và tập trung vào việc cải thiện các môn học yếu.
+        4. Đề xuất các tài liệu học tập phù hợp với từng môn học và điểm yếu cụ thể.
+        5. Chiến lược theo dõi tiến độ phải đo lường được và có thể điều chỉnh khi cần thiết.
+        """
+        return prompt
+
+    @staticmethod
     def create_prompt_get_question(words, n=5):
         prompt = f"""
         Dưới đây là danh sách các từ quan trọng được trích xuất từ văn bản gốc. Dựa trên những từ này, vui lòng tạo ra ít nhất {n} câu hỏi trắc nghiệm với cấu trúc rõ ràng, dễ dàng cho hệ thống front-end trích xuất. Mỗi câu hỏi cần có 4 lựa chọn (A, B, C, D), trong đó chỉ có một câu trả lời đúng.
