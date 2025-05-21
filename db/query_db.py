@@ -1,5 +1,4 @@
 import pymongo
-from bson.json_util import dumps
 
 class QueryDB:
     def __init__(self,
@@ -14,10 +13,16 @@ class QueryDB:
     def insert_data(self,contents):
         self.collection.insert_many([{"title": doc["title"],"content": doc["content"],"file_name": doc["file_name"],"doc_id": doc["doc_id"], "embeddings": doc["embeddings"]} for doc in contents])
 
-    def get_document_by_id(self,docIds):
+    def get_document_by_list_doc_id(self,docIds):
         query = {"doc_id": {"$in": docIds}}
         projection = {"file_name": 0, "embeddings": 0, "title": 0, "_id": 0}
         documents = list(self.collection.find(query,projection))
+        return documents
+
+    def get_document_by_id(self, docId):
+        query = {"doc_id":  docId}
+        projection = {"file_name": 0, "embeddings": 0, "title": 0, "_id": 0}
+        documents = list(self.collection.find(query, projection))
         return documents
 
     def clear_data(self):

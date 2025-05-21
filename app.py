@@ -31,7 +31,7 @@ load_dotenv()
 # CORS(app)
 CORS(
     app,
-    resources={r"/api/*": {"origins": ["http://localhost:5173", "http://localhost:8088", "http://localhost:8084"]}},
+    resources={r"/api/*": {"origins": ["http://localhost:5173", "http://localhost:8088", "http://localhost:8084", "http://dtuforyou.xyz", "https://dtuforyou.xyz"]}},
     methods=["GET", "POST", "PUT"],
     allow_headers=["Content-Type", "Authorization"],
     supports_credentials=True,
@@ -211,6 +211,7 @@ def check_file():
         # Tải file từ URL
         response = requests.get(data_request.filePath)
         if response.status_code != 200:
+            print(response)
             return ApiResponse.error(message="Failed to fetch file from URL", code=404)
 
         # Kiểm tra loại file
@@ -257,25 +258,34 @@ def handle_offer_improved_solutions():
         data = request.get_json()
         # Tách Final Grade ra
         final_grade = data.pop("Final Grade")
+        subject_weakens_dict = data.pop("subject_weakens")
+        courses_period = data.pop("courses_period")
+        subject_weakens_array = [v for v in subject_weakens_dict["subject_weaken_dict"].values()]
 
         # Chuyển đổi thành key: value
         flattened_data = {key: list(value.values())[0] for key, value in data.items()}
 
         print(flattened_data)
 
-        strengths, weakness = rag.identify_strengths_weaknesses(flattened_data)
+        # strengths, weakness = rag.identify_strengths_weaknesses(flattened_data)
 
-        print(strengths, weakness)
+        # print(strengths, weakness)
 
-        prompt = rag.create_prompt_predict_score(flattened_data, final_grade, strengths, weakness)
+        # prompt = rag.create_prompt_predict_score(flattened_data, final_grade, strengths, weakness)
+        prompt = rag.create_prompt_learning_analyze(flattened_data,final_grade, courses_period,subject_weakens_array)
 
         response = call_llm_query("get solution for student", prompt)
+        answer = response.text
+        clean_answer = re.sub(r"^```json\s*|```$", "", answer.strip())
+        print(clean_answer)
+        data = json.loads(clean_answer)
+        data["subject_weakens"] = subject_weakens_array
 
         return jsonify(
             {
                 "code": 200,
                 "message": "success",
-                "data": response.text
+                "data": data
             }
         )
     except Error as e:
@@ -315,7 +325,41 @@ def handle_generate_question():
     except Exception as e:
         return ApiResponse.error(message=f"An unexpected error occurred: {str(e)}", code=500)
 
+
+@app.route(f"{BASE_URL}/document/generate-assignment", methods=['GET'])
+def handle_generate_assignment():
+    try:
+        doc_id = int(request.args.get("docId"))
+        number_question = int(request.args.get("numberQuestion"))
+
+        if not doc_id or not number_question:
+            ApiResponse.error(message=f"No request provided", code=400)
+
+        documents = query_db.get_document_by_id(doc_id)
+        full_text = "".join([doc["content"] for doc in documents])
+        words= ReadFile.clean_and_tokenize(ReadFile(),full_text)
+        max_chunk_size = 10000
+        responses= []
+        list_question= []
+        if len(words) > max_chunk_size:
+            word_chunks = [words[i:i + max_chunk_size] for i in range(0, len(words), max_chunk_size)]
+        else:
+            word_chunks = [words]
+
+        for i,word in enumerate(word_chunks):
+            print(f"🔹Get question {i+1}/{len(word_chunks)}...")
+            get_prompt = rag.create_prompt_get_question(word,number_question)
+            response= call_llm_query("Take multiple choice questions from the document",get_prompt)
+            responses.append(response.text)
+
+        for response in responses:
+            questions= ReadFile.extract_questions_and_answers(response)
+            list_question= list_question + questions
+
+        return ApiResponse.success(data=list_question)
+    except Exception as e:
+        return ApiResponse.error(message=f"An unexpected error occurred: {str(e)}", code=500)
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5002, debug=True)
-
 
