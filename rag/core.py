@@ -243,7 +243,7 @@ class RAG:
         return prompt
 
     @staticmethod
-    def create_prompt_get_question(words, n=5):
+    def create_prompt_get_question(words, n=7):
         prompt = f"""
         Dưới đây là danh sách các từ quan trọng được trích xuất từ văn bản gốc. Dựa trên những từ này, vui lòng tạo ra ít nhất {n} câu hỏi trắc nghiệm với cấu trúc rõ ràng, dễ dàng cho hệ thống front-end trích xuất. Mỗi câu hỏi cần có 4 lựa chọn (A, B, C, D), trong đó chỉ có một câu trả lời đúng.
 
@@ -317,4 +317,36 @@ class RAG:
 
         return strengths, weaknesses
 
+    @staticmethod
+    def create_prompt_review(query, source_information, response_model):
+        prompt = f"""
+        Bạn là một chuyên gia trợ lý ảo hỗ trợ học tập.
+    
+        Nhiệm vụ của bạn là:
+        1. Cải thiện câu trả lời bên dưới cho rõ ràng, đầy đủ, dễ hiểu hơn
+        2. Ưu tiên sử dụng thông tin từ phần nguồn nếu phù hợp
+        3. Bổ sung kiến thức bên ngoài nếu cần thiết, **nhưng phải đúng và phù hợp ngữ cảnh học thuật**
+        4. Xác định tên tài liệu phù hợp nhất từ phần nguồn để người dùng có thể tra cứu thêm
+    
+        ### Câu hỏi của người dùng:
+        {query}
+    
+        ### Thông tin nguồn:
+        {source_information}
+    
+        ### Câu trả lời ban đầu:
+        {response_model}
+    
+        ### Yêu cầu:
+        Hãy trả về kết quả dưới dạng JSON với cấu trúc sau:
+    
+        {{
+          "improved_answer": "<Câu trả lời đã được cải thiện, rõ ràng, đầy đủ>",
+          "reference_document": "<Tên tài liệu phù hợp nhất từ phần nguồn, ví dụ: 'Bài giảng Lý thuyết đồ thị.pdf'>"
+        }}
+    
+        Nếu không tìm thấy tài liệu phù hợp trong nguồn, hãy để "reference_document" là null.
+        """
+
+        return prompt
 
