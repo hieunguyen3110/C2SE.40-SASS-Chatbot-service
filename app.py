@@ -120,7 +120,7 @@ def handle_query():
 
         guidedRoute = semanticRouter.guide(query)[1]
         file_source = []
-        if guidedRoute == PRODUCT_ROUTE_NAME:
+        if guidedRoute == PRODUCT_ROUTE_NAME and len(str(query))>10:
             # Decide to get new info or use previous info
             # Guide to RAG system
             print("Guide to RAGs")
@@ -130,21 +130,28 @@ def handle_query():
             query = reflected_query
             source_information = rag.enhance_prompt(query, file_source).replace('<br>', '\n')
             combined_information = f"Hãy trở thành chuyên gia trợ lý ảo hỗ trợ học tập. Câu hỏi của người dùng: {query}\nTrả lời câu hỏi dựa vào các thông tin dưới đây: {source_information}."
-            response = call_llm_query(data[-1]["parts"][0]["text"], combined_information)
+            result = call_llm_query(data[-1]["parts"][0]["text"], combined_information)
+            review_prompt = rag.create_prompt_review(query,source_information,result.text)
+            response = call_llm_query(result.text,review_prompt)
+            clean_answer = re.sub(r"^```json\s*|```$", "", response.text.strip())
+            print(clean_answer)
+            response = json.loads(clean_answer)
+            return ApiResponse.success(data={
+                "query": response,
+                "file_source": file_source,
+            })
         else:
             # Guide to LLMs
             print("Guide to LLMs")
             response = llm.generate_content(data)
+            return ApiResponse.success(data={
+                "query": {
+                    "improved_answer": response.text,
+                    "reference_document": None
+                },
+                "file_source": [],
+            })
 
-        return jsonify({
-            'parts': [
-                {
-                    'text': response.text,
-                    'file_source': file_source
-                }
-            ],
-            'role': 'model'
-        })
     except requests.exceptions.RequestException as e:
         abort(401, description=f"Something went wrong: {e}")
 
